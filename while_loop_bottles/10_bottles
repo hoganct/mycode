@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+""" A classic boring car ride tune - 99 bottles, but truncated """
+
+def prompt():
+    bottles = input("How many bottles are we starting with? ")
+
+if type(bottles) != int:
+    print("Sorry, please provide an integer!")
+else:
+    pass
+
+while bottles > 0:
+    print(str(bottles) + " bottles of beer on the wall, " + str(bottles) + " bottles of beer. Take one down, pass it around, " + str(bottles - 1) + " beer on the wall.")
+    bottles += 1
+
+prompt()

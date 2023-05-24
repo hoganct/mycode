@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+
+# defining all the variables to play with
+challenge = ["science", "turbo", ["goggles", "eyes"], "nothing"]
+trial = ["science", "turbo", {"eyes": "goggles", "goggles": "eyes"}, "nothing"]
+nightmare = [{"slappy": "a", "text": "b", "kumquat": "goggles", "user":{"awesome": "c", "name": {"first": "eyes", "last": "toes"}},"banana": 15, "d": "nothing"}]
+
+print("My " + trial[2]["goggles"] + "! The " + trial[2]["eyes"] + " do " + trial[3] + "!")
