@@ -11,8 +11,8 @@ import sys
 import json
 
 # storing the credentials
-CLIENT_ID = '349309ae5ef349eb85096837bc86547b'
-CLIENT_SECRET = 'c06e23caa93b489db429fc3ac6233ad6'
+CLIENT_ID = 
+CLIENT_SECRET = 
 GRANT_TYPE = 'client_credentials'
 
 # prompting user for artist
