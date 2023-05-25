@@ -38,8 +38,10 @@ def get_search_page(artist, limit, offset, token):
     response = requests.get(url, headers={
         'Authorization': f'Bearer {token}'})
     return response.json()
+    
+#print(response.json())
 
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     auth_token = get_auth_token()
 
     limit = 10  # how many items you want on each "page"
@@ -48,14 +50,14 @@ if __name__ == "__main__":
     # Most likely won't run into this super quick, but be careful of Spotify rate limiting you with this while loop
     # total_pages starts at the max int size until we can pull back the max number of pages returned from the search
     total_pages = 1
-    while offset < total_pages:
+    while offset < (total_pages):
         # data provides a list of tracks under data['tracks']['items'] for each track there is a list of artists ex:
         # data['tracks']['items'][0]['artists']. You'll be able to pull the name of each artist there and consider
         # them a collaborator of Above & Beyond ex: data['tracks']['items'][0]['artists'][0]['name']
         data = get_search_page(artist, limit, offset, auth_token)
         print(json.dumps(data, indent=2))  # print json page retrieved from search
 
-        total_pages = data['tracks']['total']
+        total_pages = data['tracks']['items'][0]['artists']
         offset = offset + 1
 
-print(total_pages)
+print(total_pages)"""
