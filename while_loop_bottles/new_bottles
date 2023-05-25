@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" A classic boring car ride tune - 99 bottles, but truncated """
+""" A classic boring car ride tune - 99 bottles"""
 
 bottles = int(input("How many bottles are we starting with? "))
 drop_one = bottles - 1
