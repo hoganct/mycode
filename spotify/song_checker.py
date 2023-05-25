@@ -30,6 +30,8 @@ def get_auth_token():
     return response.json()['access_token']
 
 
+
+
 # this will search for the artist and provide a list of tracks back
 def get_search_page(artist, limit, offset, token):
     url = f"https://api.spotify.com/v1/search?q=artist%3A{artist}&type=track&market=US&limit={limit}&offset={offset}"
