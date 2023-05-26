@@ -1,0 +1,4 @@
+The total number of failed log in attempts is 3. The attempts came from 172.16.1.5
+
+The total number of successful log in attempts is 1. The user logged in from 172.16.1.5
+
