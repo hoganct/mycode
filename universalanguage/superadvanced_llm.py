@@ -11,8 +11,9 @@ def main():
     wordcount = 0 # counter
     saved_words = [] # to compile into sentence
 
-    with open("dracula.txt", encoding="utf-8") as file: # parsing out all the words in dracula into a list; the file is available from here (https://www.gutenberg.org/files/345/345-0.txt), but any .txt file will work
-        for line in file:
+    # parsing out all the words in dracula into a list, with UTF-8 encoding
+    with open("dracula.txt", encoding="utf-8") as file: # the file is available from here (https://www.gutenberg.org/files/345/345-0.txt), but any .txt file will work
+        for line in file: 
             words = line.split()
             parsed_words.extend(words)
 
