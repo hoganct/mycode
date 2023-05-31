@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+import pandas as pd
+import csv
+import matplotlib.pyplot as plt
+
+column_names = ['STOCK #', 'VIN', 'YEAR', 'MAKE',
+    'MODEL', 'MILEAGE (IN KM)', 'CERTIFIED PRE-OWNED (Y/N)',
+    'PHOTO COUNT', 'COLOR', 'INTERIOR',
+    'LIST PRICE', 'DISCOUNT', 'REBATE', 'SELLING PRICE',
+    'FINANCE PRICE', 'FINANCE TERM (IN MONTHS)', 'DATE']
+
+df = pd.read_csv('cars.csv', names = column_names)
+
+#print(df)
+
+print(df.head(10)) # printing the first 10
+print(df.tail(20)) # printing the last 20
+print(df.sample(n=10)) # random sample of 10
+
+mileage = df["MILEAGE (IN KM)"]
+list_price = df["LIST PRICE"]
+
+plt.scatter(mileage, list_price)
+plt.xlabel("Mileage, in km")
+plt.ylabel("List Price")
+plt.title("Mileage vs List Price")
+plt.savefig("mileage_vs_price_scatter.png")
+
+"""year_vs_finance = ['YEAR', 'FINANCE TERM (IN MONTHS)']
+
+comparison = df[year_vs_finance].describe()
+
+print(comparison)
+
+color = df.groupby('EXTERIOR COLORS')
+print(color)
+
+print(df.mean('LIST PRICE'))
+print(df.max('MILEAGE (IN KM)')) """
