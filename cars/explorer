@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import pandas as pd
-import csv
 import matplotlib.pyplot as plt
 
 column_names = ['STOCK #', 'VIN', 'YEAR', 'MAKE',
@@ -10,31 +9,33 @@ column_names = ['STOCK #', 'VIN', 'YEAR', 'MAKE',
     'LIST PRICE', 'DISCOUNT', 'REBATE', 'SELLING PRICE',
     'FINANCE PRICE', 'FINANCE TERM (IN MONTHS)', 'DATE']
 
+# defining dataframe as df from cars.csv, using column names
 df = pd.read_csv('cars.csv', names = column_names)
 
-#print(df)
-
+# just exploring the data here
 print(df.head(10)) # printing the first 10
 print(df.tail(20)) # printing the last 20
 print(df.sample(n=10)) # random sample of 10
 
-mileage = df["MILEAGE (IN KM)"]
+# setting the two columns in the dataframe
+mileage = df["MILEAGE (IN KM)"] 
 list_price = df["LIST PRICE"]
 
-plt.scatter(mileage, list_price)
-plt.xlabel("Mileage, in km")
-plt.ylabel("List Price")
-plt.title("Mileage vs List Price")
-plt.savefig("mileage_vs_price_scatter.png")
+# creating scatter plot
+plt.scatter(mileage, list_price, c='teal', alpha=0.6, marker='o', edgecolors='white')
+plt.xlabel("Mileage, in km", fontsize=14)
+plt.ylabel("List Price", fontsize=14)
+plt.title("Odometer vs Price", fontsize=16)
+plt.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
 
-"""year_vs_finance = ['YEAR', 'FINANCE TERM (IN MONTHS)']
+# adding a color bar
+colorbar = plt.colorbar()
+colorbar.set_label("Density", fontsize=12)
 
-comparison = df[year_vs_finance].describe()
+# adding additional visual elements
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=12)
+plt.tight_layout()
 
-print(comparison)
-
-color = df.groupby('EXTERIOR COLORS')
-print(color)
-
-print(df.mean('LIST PRICE'))
-print(df.max('MILEAGE (IN KM)')) """
+# saving the plot as a png
+plt.savefig("scatter_plot.png", dpi=300)
