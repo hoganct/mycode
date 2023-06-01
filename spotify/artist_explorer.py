@@ -11,10 +11,14 @@ client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, clien
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # defining CSV and field names
-csv_file = 'tracks.csv'
+csv_file = '50_tracks.csv'
 field_names = ['Artist Name', 'Artist URI', 'Track Name', 'Track URI', 'Album',
-               'Danceability', 'Energy', 'Key', 'Loudness', 'Mode', 'Speechiness',
+               'Key', 'Mode', 'Danceability', 'Energy', 'Loudness', 'Speechiness',
                'Acousticness', 'Instrumentalness', 'Liveness', 'Valence', 'Tempo']
+
+with open(csv_file, 'w', newline='') as file: # opening our csv to append
+        writer = csv.DictWriter(file, fieldnames=field_names) # using writer to write to csv
+        writer.writeheader() # writing the header
 
 def artist_lookup():
     # prompt the user for an artist name
@@ -36,9 +40,9 @@ def top_tracks(artist_uri, user_artist):
     results = sp.artist_top_tracks(artist_uri) # takes the artist_uri as an argument for top tracks
     tracks = results['tracks'] # pulls just tracks from the results
 
-    print("\n The top 10 tracks for the artist are...")
+    print("\n\nThe top 10 tracks for the artist are...\n")
     with open(csv_file, 'a', newline='') as file: # opening our csv to append
-        writer = csv.DictWriter(file, fieldnames=field_names) # using writer
+        writer = csv.DictWriter(file, fieldnames=field_names) # using writer to write to csv
         for track in tracks:
             track_uri = track['uri'][14:] # pulls just the uri, drops the first 14 characters (spotify:track:)
             track_info = sp.track(track_uri) # gets additional track info for each track from track_uri
@@ -50,18 +54,18 @@ def top_tracks(artist_uri, user_artist):
                 'Track Name': track['name'],
                 'Track URI': track_uri,
                 'Album': track_info['album']['name'],
+                'Key': audio_features[0]['key'],
+                'Mode': audio_features[0]['mode'],
                 'Danceability': audio_features[0]['danceability'],
                 'Energy': audio_features[0]['energy'],
-                'Key': audio_features[0]['key'],
                 'Loudness': audio_features[0]['loudness'],
-                'Mode': audio_features[0]['mode'],
                 'Speechiness': audio_features[0]['speechiness'],
                 'Acousticness': audio_features[0]['acousticness'],
                 'Instrumentalness': audio_features[0]['instrumentalness'],
                 'Liveness': audio_features[0]['liveness'],
                 'Valence': audio_features[0]['valence'],
                 'Tempo': audio_features[0]['tempo']
-            }) # might want to add a couple here
+            }) # might want to modify some values here, but this is good for now
 
             print(f"{track['name']}")
 
@@ -74,6 +78,6 @@ def related_artists(artist_uri): # creating a function to find related artists
         artist_uri = artist['uri']
         related_artists_uris.append(artist_uri) # appending to the list
         top_tracks(artist_uri, artist['name']) # sending this through top_tracks
-        print(related_artists_uris)
+        #print(related_artists_uris)
 
 artist_lookup()
