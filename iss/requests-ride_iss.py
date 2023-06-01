@@ -34,6 +34,12 @@ def main():
     people = helmetson['people']
     print(people)
 
+    for craft in helmetson['people'][0]:
+        craft = spacecraft
+
+    for astronaut in helmetson['people']['name'][0]:
+        print(f"{astronaut} on the {spacecraft}")
+
 if __name__ == "__main__":
     main()
 
