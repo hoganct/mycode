@@ -3,15 +3,9 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import requests
 
-<<<<<<< HEAD
-# storing my Spotify API credentials - delete before commit!
-CLIENT_ID = 
-CLIENT_SECRET = 
-=======
 # Storing my Spotify API credentials - delete before commit!
-CLIENT_ID = '349309ae5ef349eb85096837bc86547b'
-CLIENT_SECRET = '2c5d4880a00a4bba80c915b55ccb54b5'
->>>>>>> cddf393 (formatting and bokeh improvements)
+CLIENT_ID = ''
+CLIENT_SECRET = ''
 
 # Authenticate with Spotify
 client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
@@ -23,7 +17,7 @@ field_names = ['Artist Name', 'Artist URI', 'Track Name', 'Track URI', 'Album',
                'Key', 'Mode', 'Danceability', 'Energy', 'Loudness', 'Speechiness',
                'Acousticness', 'Instrumentalness', 'Liveness', 'Valence', 'Tempo', 'Embed Code']
 
-with open(csv_file, 'w', newline='') as file:
+with open(csv_file, 'w', newline='') as file: # Writing to the csv, with open, using writer
     writer = csv.DictWriter(file, fieldnames=field_names)
     writer.writeheader()
 
@@ -39,28 +33,23 @@ def artist_lookup():
     if results['artists']['items']:
         artist = results['artists']['items'][0]
         artist_uri = artist['uri']
-        top_tracks(artist_uri, user_artist)
-        related_artists(artist_uri)
+        top_tracks(artist_uri, user_artist) # Passing to top_tracks, with artist_uri and user_artist as arguments
+        related_artists(artist_uri) # Passing to related_artists, with artist_uri as argument
     else:
         print("Artist not found.")
 
 
 def top_tracks(artist_uri, user_artist):
-    results = sp.artist_top_tracks(artist_uri)
-    tracks = results['tracks']
+    results = sp.artist_top_tracks(artist_uri) # Saving as results
+    tracks = results['tracks'] # Looking for just tracks
 
     print("\n\nThe top 10 tracks for the artist are...\n")
-<<<<<<< HEAD
-    with open(csv_file, 'a', newline='') as file: # opening our csv to append
-        writer = csv.DictWriter(file, fieldnames=field_names) # using writer to write to csv
-=======
-    with open(csv_file, 'a', newline='', encoding="utf-8") as file:
+    with open(csv_file, 'a', newline='', encoding="utf-8") as file: # Opening and appending the csv now
         writer = csv.DictWriter(file, fieldnames=field_names)
->>>>>>> cddf393 (formatting and bokeh improvements)
         for track in tracks:
-            track_uri = track['uri'][14:]
-            track_info = sp.track(track_uri)
-            audio_features = sp.audio_features(track_uri)
+            track_uri = track['uri'][14:] # Dropping the first 15 characters (spotify:tracks:) from the output
+            track_info = sp.track(track_uri) # Getting information for each track, such as Album Name
+            audio_features = sp.audio_features(track_uri) # Getting audio features
 
             # Perform Spotify oEmbed lookup
             oembed_api_url = (f'https://open.spotify.com/oembed?url=https://open.spotify.com/track/{track_uri}&format=json')
@@ -68,11 +57,11 @@ def top_tracks(artist_uri, user_artist):
 
             if response.status_code == 200:
                 oembed_data = response.json()
-                embedded_html = oembed_data['html']
+                embedded_html = oembed_data['html'] # Taking just the html portion of the response.json()
             else:
                 embedded_html = ''
 
-            writer.writerow({
+            writer.writerow({ # Writing everything to the csv now
                 'Artist Name': user_artist,
                 'Artist URI': artist_uri[15:],
                 'Track Name': track['name'],
@@ -95,15 +84,15 @@ def top_tracks(artist_uri, user_artist):
             print(f"{track['name']}")
 
 
-def related_artists(artist_uri):
+def related_artists(artist_uri): # Using this to look up the 4 most closely related artists for the user_artist
     print("\nAnd 4 related artists... ")
     related = sp.artist_related_artists(artist_uri)
     related_artists_uris = []
-    for artist in related['artists'][:4]:
+    for artist in related['artists'][:4]: # Limiting to just 4
         print(artist['name'])
         artist_uri = artist['uri']
-        related_artists_uris.append(artist_uri)
-        top_tracks(artist_uri, artist['name'])
+        related_artists_uris.append(artist_uri) # Appending to the list
+        top_tracks(artist_uri, artist['name']) # Running each of these through top_tracks
 
 
 artist_lookup()
