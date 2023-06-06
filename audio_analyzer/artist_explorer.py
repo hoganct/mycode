@@ -4,8 +4,8 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import requests
 
 # Storing my Spotify API credentials - delete before commit!
-CLIENT_ID = ''
-CLIENT_SECRET = ''
+CLIENT_ID = '349309ae5ef349eb85096837bc86547b'
+CLIENT_SECRET = '2c5d4880a00a4bba80c915b55ccb54b5'
 
 # Authenticate with Spotify
 client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
