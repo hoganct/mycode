@@ -90,9 +90,3 @@ def write_album_data_to_file(album_list, filename):
         json.dump(album_list, f, indent=4)
 
 write_album_data_to_file(album_list, filename)
-
-
-"""with open('album_data.json', 'w', encoding='utf-8') as json_file:
-    json.dump(album_list, json_file, ensure_ascii=False, indent=4)
-
-print("Data saved as album_data.json")"""
