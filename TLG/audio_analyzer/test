@@ -1,0 +1,126 @@
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+import requests
+import json
+import time
+
+# Storing my Spotify API credentials - delete before commit!
+CLIENT_ID = ''
+CLIENT_SECRET = ''
+
+# Authenticate with Spotify
+client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+# Create a list to store albums and their songs
+album_list = []
+
+def episode_lookup():
+    # Initialize a counter for the albums
+    album_counter = 1
+    
+    while True:
+        # Get user input for the starting album number
+        start_album_number = album_counter
+        
+        # Number of albums to retrieve per query
+        album_count = 50
+        
+        # Create a fuzzy query by adding a wildcard to the album number
+        fuzzy_query = f'album:"{start_album_number}D*"'
+        
+        try:
+            # Search for the albums using Spotify API
+            results = sp.search(q=fuzzy_query, type='album', limit=album_count)
+            
+            # Check for errors in the response
+            if 'error' in results:
+                print(f"Error: {results['error']['message']}")
+                break
+            
+            # Check if there are albums in the response
+            if 'items' in results['albums']:
+                albums = results['albums']['items']
+                
+                # Process the retrieved albums here
+                for album in albums:
+                    album_data = {
+                        "Album Name": album['name'],
+                        "Album URI": album['uri'],
+                        "Artist Name": album['artists'][0]['name'],  # Assuming the first artist is the primary one
+                        "Artist URI": album['artists'][0]['uri'],
+                        "Release Date": album['release_date'],
+                        "Total Tracks": album['total_tracks'],
+                        "Songs": []  # Initialize an empty list to store songs
+                    }
+                    
+                    # Get tracks for the album and add them to the album data
+                    get_album_tracks(album_data)
+                    
+                    # Add the album data to the list
+                    album_list.append(album_data)
+                
+                # Increment the album counter
+                album_counter += album_count
+                
+                # Prompt the user to continue or exit
+                user_input = input(f"Do you want to continue to albums {album_counter} - {album_counter + album_count - 1}? (y/n): ")
+                
+                if user_input.lower() != 'y':
+                    break
+            else:
+                print(f"No albums found for albums {album_counter} - {album_counter + album_count - 1}")
+                break
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                print("Rate limited. Waiting for a while before retrying...")
+                time.sleep(60)  # Wait for 60 seconds and retry
+                continue
+            else:
+                print(f"HTTPError: {e}")
+                break
+
+def get_album_tracks(album_data):
+    # Retrieve tracks from the album using the album URI
+    album_tracks = sp.album_tracks(album_data["Album URI"])
+
+    for track in album_tracks['items']:
+        track_data = {
+            "Artist Name": track['artists'][0]['name'],  # Assuming the first artist is the primary one
+            "Artist URI": track['artists'][0]['uri'],
+            "Track Name": track['name'],
+            "Track URI": track['uri'],
+            "Spotify ID": track['id'],
+            "Analysis Data": get_track_analysis(track['uri'])
+            # Add more track-specific data here
+        }
+        album_data["Songs"].append(track_data)
+
+def get_track_analysis(track_uri):
+    # Retrieve audio analysis data for the track
+    audio_features = sp.audio_features([track_uri])[0]  # Pass a list with a single URI and access the first element
+    
+    # Extract the relevant analysis data you need
+    audio_features_data = {
+        'Key': audio_features['key'],
+        'Mode': audio_features['mode'],
+        'Danceability': audio_features['danceability'],
+        'Energy': audio_features['energy'],
+        'Loudness': audio_features['loudness'],
+        'Speechiness': audio_features['speechiness'],
+        'Acousticness': audio_features['acousticness'],
+        'Instrumentalness': audio_features['instrumentalness'],
+        'Liveness': audio_features['liveness'],
+        'Valence': audio_features['valence'],
+        'Tempo': audio_features['tempo']
+        # Add more analysis data here
+    }
+    return audio_features_data
+
+episode_lookup()
+
+# Save the album data as a JSON file
+with open('album_data.json', 'w', encoding='utf-8') as json_file:
+    json.dump(album_list, json_file, ensure_ascii=False, indent=4)
+
+print("Data saved as album_data.json")

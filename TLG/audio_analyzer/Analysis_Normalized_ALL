@@ -28,49 +28,59 @@ with open(csv_file, 'w', newline='') as file:
     writer = csv.DictWriter(file, fieldnames=field_names)
     writer.writeheader()
 
+def episode_lookup():
+    # Prompt the user for the album name
+    user_album_title = input("Enter the ABGT episode number you want to analyze: ")
 
-def artist_lookup():
-    # Prompt the user for an artist name
-    user_artist = input("Enter an artist: ")
+    # Construct the query string to search for the album by "Above & Beyond" with the specified title
+    query = f'album:"{"Group Therapy " + user_album_title}" artist:"Above & Beyond"'
 
-    # Search for the artist using Spotify API
-    results = sp.search(q='artist:' + user_artist, type='artist', limit=1)
+    # Search for the album using Spotify API
+    results = sp.search(q=query, type='album', limit=1)
 
-    # Get the artist URI from the search results
-    if results['artists']['items']:
-        artist = results['artists']['items'][0]
-        artist_uri = artist['uri']
-        top_tracks(artist_uri, user_artist) # Passing to top_tracks, with artist_uri and user_artist as arguments
-        related_artists(artist_uri) # Passing to related_artists, with artist_uri as argument
+    # Check if the 'album' key exists in the 'results' dictionary
+    if 'albums' in results and 'items' in results['albums'] and results['albums']['items']:
+        album = results['albums']['items'][0]
+        album_uri = album['uri']
+        get_album_tracks(album_uri, album)
     else:
-        print("Artist not found.")
+        print("Episode not found.")
 
+def get_album_tracks(album_uri, album):
+    # Retrieve tracks from the album using the album URI
+    album_tracks = sp.album_tracks(album_uri)
 
-def top_tracks(artist_uri, user_artist):
-    results = sp.artist_top_tracks(artist_uri) # Saving as results
-    tracks = results['tracks'] # Looking for just tracks
-
-    print("\n\nThe top 10 tracks for the artist are...\n")
-    with open(csv_file, 'a', newline='', encoding="utf-8") as file: # Opening and appending the csv now
+    with open(csv_file, 'a', newline='', encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=field_names)
-        for track in tracks:
-            track_uri = track['uri'][14:] # Dropping the first 15 characters (spotify:tracks:) from the output
-            track_info = sp.track(track_uri) # Getting information for each track, such as Album Name
-            audio_features = sp.audio_features(track_uri) # Getting audio features
+
+        for track in album_tracks['items']:
+            track_uri = track['uri'][14:]  # Dropping the first 15 characters (spotify:tracks:) from the output
+            track_info = sp.track(track_uri)  # Getting information for each track, such as Album Name
+            audio_features = sp.audio_features(track_uri)  # Getting audio features
 
             # Perform Spotify oEmbed lookup
-            oembed_api_url = (f'https://open.spotify.com/oembed?url=https://open.spotify.com/track/{track_uri}&format=json')
+            oembed_api_url = (
+                f'https://open.spotify.com/oembed?url=https://open.spotify.com/track/{track_uri}&format=json')
             response = requests.get(oembed_api_url)
 
             if response.status_code == 200:
                 oembed_data = response.json()
-                embedded_html = oembed_data['html'] # Taking just the html portion of the response.json()
+                embedded_html = oembed_data['html']  # Taking just the HTML portion of the response.json()
             else:
                 embedded_html = ''
 
-            writer.writerow({ # Writing everything to the csv now
-                'Artist Name': user_artist,
-                'Artist URI': artist_uri[15:],
+            # Retrieve the first artist's information for each track
+            artists = track_info['artists']
+            artist_names = [artist['name'] for artist in artists]
+            artist_uris = [artist['uri'][15:] for artist in artists]
+
+            combined_artist_names = ', '.join(artist_names)
+            combined_artist_uris = ' / '.join(artist_uris)
+
+            if 'group therapy' not in track['name'].lower():
+                writer.writerow({
+                'Artist Name': combined_artist_names,
+                'Artist URI': combined_artist_uris,
                 'Track Name': track['name'],
                 'Track URI': track_uri,
                 'Album': track_info['album']['name'],
@@ -88,24 +98,10 @@ def top_tracks(artist_uri, user_artist):
                 'Embed Code': embedded_html
             })
 
-            print(f"{track['name']}")
-
-
-def related_artists(artist_uri): # Using this to look up the 4 most closely related artists for the user_artist
-    print("\nAnd 4 related artists... ")
-    related = sp.artist_related_artists(artist_uri)
-    related_artists_uris = []
-    for artist in related['artists'][:4]: # Limiting to just 4
-        print(artist['name'])
-        artist_uri = artist['uri']
-        related_artists_uris.append(artist_uri) # Appending to the list
-        top_tracks(artist_uri, artist['name']) # Running each of these through top_tracks
-
-
-artist_lookup()
+episode_lookup()
 
 # Reading CSV made from artist_explorer.py
-df = pd.read_csv('50_tracks.csv', encoding='utf-8')
+df = pd.read_csv('ABGT_tracks.csv', encoding='utf-8')
 
 # Select the columns from the 8th field onwards - just the floats and tempo, no strings
 data_columns = df.columns[7:-1]  # Exclude the last column "Embed Code"
@@ -130,7 +126,7 @@ field2 = top_two_fields.index[1]  # Get the field name of the second field
 print(f"The two fields with the greatest variance are {field1} and {field2}.\n")
 
 # Ask the user if they want to use the fields with the greatest variance or define their own fields
-user_choice = input("Would you like select your own categories to analyze? (Y/N): ")
+user_choice = input("Would you like select your own categories to analyze? (y/n): ")
 
 if user_choice.lower() == 'y':
     field1 = input("Enter Field 1: ") # Would be nice to incorporate some input filtering/control here
@@ -141,22 +137,16 @@ print("\nThe two selected fields are:")
 print(field1)
 print(field2)
 
-# Get unique artists
-artists = df['Artist Name'].unique()
-
-# Defining a color palette for each artist
-color_palette = ['#FF0000', '#FF8000', '#000080', '#008000', '#00FFFF']
-
-# Create a color mapper mapping each artist to a color
-num_artists = len(artists)
-palette = color_palette[:num_artists]
-color_mapper = CategoricalColorMapper(factors=artists, palette=palette) # Building using CCM
-
-# Create the scatterplot with colored points
+# Create the scatterplot with black points (no color mapping)
 scatterplot = figure()
-scatterplot.circle(x=field1, y=field2, source=df, fill_color={'field': 'Artist Name', 'transform': color_mapper}, size=6, legend_field='Artist Name')
-
-"""right about here is the limit of my abilities - this was heavily influenced by stackoverflow research, co-pilot, and ChatGPT"""
+scatterplot.circle(
+    x=field1,
+    y=field2,
+    source=df,
+    fill_color='black',  # Set to black
+    line_color='black',  # Set the outline color to black
+    size=6,
+)
 
 # Customize hover tooltips
 hover = HoverTool(tooltips=[("Artist", "@{Artist Name}"), ("Track", "@{Track Name}")])
